@@ -1,0 +1,100 @@
+Initialize a modern Vite + React web application with Tailwind CSS and Lucide React icons. Build a highly accurate, fully functional desktop Spotify Web Player clone tailored explicitly for a SPOTIFY PREMIUM user experience. This application serves as a functional proof-of-concept demonstrating a 5-stage interactive "Discovery Dial."
+
+The core engine must leverage state-driven algorithmic routing: changing the dial must dynamically query, filter, and re-arrange a local seed database of 100 tracks to completely re-hydrate the homepage layout with relevant curated playlist grids, custom contextual rows, and track rows.
+
+---
+
+### 📊 DATA CONTEXT & USER RESEARCH DICTIONARY (FOUNDATION DATA)
+The application architecture must structurally address and reflect these specific data findings gathered from 26 target segment respondents (Premium users, 18-34) and 4 user interviews:
+- Churn Risk Indicator: 88.5% of target users are platform-hopping to Instagram Reels, TikTok, and YouTube to find new music because Spotify's discovery logic has gone stale.
+- Echo Chamber Proof: 65.4% of users report that recommendations are trapped in their past listening history, explicitly stating that automated playlists like "Discover Weekly" are just looping songs they have already played a million times.
+- System Friction: 46.2% of users complain about shuffle fatigue, where the system aggressively favors a small pool of 30–50 "anchor tracks" over the rest of their library.
+
+---
+
+### 🎭 USER PERSONAS & TRANSCRIPT BEHAVIORS TO EMULATE
+Incorporate these explicit qualitative scenarios discovered during user interviews directly into the mock data, notification systems, and UI layout components:
+1. "The Vibe-Contaminated User" (Transcript 2 - Madura/Lucha): This user listens to soft music in the morning, lo-fi study beats during a 9-5 shift, and favorites at night. They complain that automated curation ("Shark Mix") poisons their vibe by mixing upbeat devotional tracks into mainstream pop sets just because they listen to devotional music at other times.
+2. "The Offline Traveler" (Transcript 1): This user relies heavily on previously streamed/cached songs when traveling through poor network zones. They experience a frustrating bug where the app gets stuck on a loading spinner and refuses to play cached entries.
+3. "The Social Lock-In User" (Transcript 3 & 4): These users are trapped on Spotify due to high data migration barriers (loss of large personal playlist libraries built over years) and social loops (playlist sharing with friends, year-end Spotify Wrapped).
+4. "The Instagram Exporter" (Transcript 4 - Sonam): This user explicitly discovers fresh, obscure indie artists on Instagram Reels and brings them back to Spotify via manual search bar inputs.
+
+---
+
+### 🌟 PREMIUM-ONLY INTERFACE REQUIREMENTS
+Strictly enforce these paid-tier UI and feature rules:
+1. CLEAN HOUSING: Zero ad banners, zero premium upsells, and zero ad placeholders.
+2. ACCOUNT VALIDATION: Display an elegant `[ Premium ]` account pill badge adjacent to the user profile avatar dropdown in the upper right quadrant.
+3. MULTI-DEVICE & UNLOCKED UTILITIES: Build fully active media controls (unrestricted scrubbing, loop toggling, unlimited skips). Emulate active multi-device utility by including a small "Smartwatch / Laptop Controller Sync" status icon and a working "Start a Spotify Jam Session" group listening icon in the footer bar.
+4. TRAFFIC LOGIC OVERRIDE: Provide a toggle switcher labeled "Simulate Offline/Travel Mode" in the top bar. When toggled true, simulate the network bug from Transcript 1: show a subtle "Playing from local cache" badge, and if a non-downloaded song is clicked, trigger a rotating infinite loading shimmer loop.
+
+---
+
+### 📂 1. WORKSPACE ARCHITECTURE & FILE LAYOUT
+Generate the application utilizing this multi-file structural paradigm:
+- `src/data/musicDatabase.js` -> Explicit 100-song database array graph.
+- `src/context/PlaybackContext.jsx` -> Global player playback states, timeline intervals, active audio indicators, and current Discovery Dial settings.
+- `src/components/Sidebar.jsx` -> Fixed left rail navigation panel including mock user playlists ("Chill Mix", "Coding Session", "Gym").
+- `src/components/PlayerBar.jsx` -> Fixed horizontal footer running sticky media playback controls.
+- `src/components/DiscoveryControl.jsx` -> Top bar component rendering the static discovery filter chip and its sliding bottom sheet modal dashboard.
+- `src/components/HomeFeed.jsx` -> Scrollable main canvas displaying contextual components driven entirely by the active dial state.
+
+---
+
+### 💾 2. THE 100-SONG MUSIC DATABASE GRAPH (`src/data/musicDatabase.js`)
+Construct a rich relational database array containing 100 distinct song objects spanning Pop, Hip-Hop, Indie Rock, Synthwave, Jazz, Devotional, and Ambient. Each item must map cleanly to this precise schema configuration:
+{
+  id: string ("track_001" to "track_100"),
+  title: string,
+  artist: string,
+  album: string,
+  duration: string ("MM:SS"),
+  coverUrl: string (valid square abstract images from unsplash),
+  genre: string,
+  streamCount: number (ranging from 1,000 to 500,000,000),
+  isLiked: boolean (at least 35 entries must be true),
+  userCustomPlaylists: array (e.g., ["Chill Mix"] or []),
+  lastPlayedMonthsAgo: number (value between 0 and 24),
+  isCoreGenre: boolean, // True if matching historical user trends
+  isDownloadedOffline: boolean // True for premium offline storage mock
+}
+
+Ensure the data population splits into these 5 clear functional subsets to power the dial:
+- Bucket A (20 Tracks - Safe Comfort): Famous hits, `isLiked: true`, `lastPlayedMonthsAgo: 0-1`, mainstream artists (The Weeknd, Taylor Swift).
+- Bucket B (20 Tracks - Forgotten Library): `isLiked: true` or inside custom playlists, but `lastPlayedMonthsAgo: 6-24`. Nostalgic indie tracks.
+- Bucket C (20 Tracks - Adjacent Standard): `isLiked: false`, `isCoreGenre: true`, `lastPlayedMonthsAgo: 2-5`. Mixed pop and indie tracking.
+- Bucket D (20 Tracks - Fresh Curation): `isLiked: false`, `isCoreGenre: true`, `lastPlayedMonthsAgo: 12+`. Brand-new unplayed artists matching current user genre preferences.
+- Bucket E (20 Tracks - Obscure Wildcards): Esoteric, ultra-low stream count tags (`streamCount < 30000`), `isCoreGenre: false`, obscure subgenres (e.g., "Tokyo City Pop 1982", "Dark Synthwave", or random "Upbeat Devotional Chants").
+
+---
+
+### 🧠 3. THE 5-STAGE DIAL ALGORITHMIC QUERY CONTROLLER
+In your dashboard rendering component, construct conditional evaluation loops reading from `musicDatabase` based on the global `discoveryStage` context value:
+
+1. 'FAMILIAR' State Logic:
+   - Queries Bucket A.
+   - Layout Elements: Row titled "Your Heavy Rotation" (Track list view) and a grid of Curated Square Playlist Cards labeled "On Repeat Mix" and "Time Capsule: Current Year".
+2. 'REDISCOVER' State Logic:
+   - Queries Bucket B.
+   - Layout Elements: Contextual row with an ancient clock icon titled "🕰️ Library Time Capsule". Track listings inside this view MUST display a visible golden meta-badge: `[Not heard in X months]` or `[Forgotten Favorite]`. Square playlist cards display custom compilations like "Lost Gems Mix".
+3. 'BALANCED' State Logic (50/50 Data Fusion):
+   - Combines exactly 4 tracks from Bucket A with exactly 4 tracks from Bucket D.
+   - Layout Elements: Standard home layout rows like "Recently Played" and a highly noticeable custom square card for "Discover Weekly" displaying a descriptive tag text line: "50% fresh tracks & 50% familiar favorites blended today".
+4. 'FRESH' State Logic:
+   - Queries Bucket D.
+   - Layout Elements: Row lines titled "✨ Emerging Artists in Your Orbit" and "New Wave Sonic Profiles". Focuses strictly on new, unliked, unplayed artists contextually filtered to match the user's primary genre profiles.
+5. 'WILD' State Logic:
+   - Queries Bucket E.
+   - Layout Elements: Completely breaks out of user history. Displays structural grid blocks titled "Niche Subgenre Focus: Tokyo City Pop" or "Experimental Lab Tracks". 
+   - Mandatory UI Shielding: Display a prominent global top notification dashboard banner with a secure lock icon: "🔒 TASTE SANDBOX MODE ACTIVE: Streaming inside this mode is safely cordoned off and will not poison your permanent daily recommendation profile."
+
+---
+
+### 🎨 4. CORE INTERACTIVE DEPLOYMENT DETAILS
+- Top Filter Button: Place a static, premium navigation chip in the top filter row labeled "✨ Discovery: [Stage Name]". Do not add spinning animations. It must use a static, thin gradient line. On hover, trigger a beautiful drop-shadow blur glow (`shadow-[0_0_15px_rgba(29,185,84,0.3)] transition-all`). Clicking it triggers a smooth bottom-sheet sliding overlay card panel.
+- The Slider Mechanism: Render a custom 5-stage stepping slider track matching the states ('familiar', 'rediscover', 'balanced', 'fresh', 'wild'). Dragging or clicking handles changes the modal's internal background tint via soft conditional radial gradient glows (Green for Familiar/Balanced, Amber/Gold for Rediscover, Deep Violet Aura for Wild Mode).
+- Playlist Cards vs Track Lists: Ensure every populated category section contains a healthy mix of vertical list rows (number, title, artist, album, duration, green offline download checkmark if `isDownloadedOffline === true`) and horizontal-scrolling card grids (square layout wrappers with a bold title, short descriptive text block, and a floating green circular playback icon appearing exclusively when hovering the specific card frame).
+- Pipeline Shimmer Animation: Clicking "[ Apply Settings ]" inside the slider overlay must close the popup and trigger an instantaneous 600ms loading skeleton shimmer effect (`animate-pulse bg-[#282828]`) across all homepage elements before seamlessly hot-swapping the music datasets.
+- Media Execution Linkage: Selecting any song row or clicking a playlist card play action must instantly hydrate the global `PlaybackContext`, passing full song properties into the sticky footer Player Bar. The Player Bar must immediately change its artwork canvas, title text, and artist strings, while initializing a functional progress timeline runner that sweeps across the duration of the chosen track.
+
+Coordinate across these multi-file structures, construct clear state bindings, implement the conditional logic routines, and deliver a fully functional, highly interactive local Spotify Premium deployment architecture.
